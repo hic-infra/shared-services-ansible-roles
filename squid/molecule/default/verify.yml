@@ -1,0 +1,59 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: get service status
+    service_facts:
+    register: services
+
+  - name: squid is installed
+    assert:
+      that: services.ansible_facts.services.squid is defined
+      fail_msg: "No squid service was defined"
+      success_msg: "Squid service found!"
+
+  - name: squid is running
+    assert:
+      that: services.ansible_facts.services['squid.service'].state == "running"
+      fail_msg: "The squid service does not appear to be running"
+      success_msg: "Squid service is running"
+
+  - name: squid is enabled
+    assert:
+      that: services.ansible_facts.services['squid.service'].status == "enabled"
+      fail_msg: "The squid service is not enabled (set to start at boot)"
+      success_msg: "The squid service will start automatically"
+
+  - name: test blocked connectivity
+    uri:
+      url: http://google.com
+      force: yes # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    environment:
+      http_proxy: "{{ ansible_ssh_host }}:3128"
+    register: req_blocked
+
+  - name: ensure connectivity to google is blocked
+    assert:
+      that: req_blocked.status == 403
+      fail_msg: "google should not be reachable through the proxy"
+      success_msg: "access to google has been denied"
+
+  - name: test allowed connectivity
+    uri:
+      url: http://{{ allowed_domains[0] }}
+      force: yes # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    environment:
+      http_proxy: "{{ ansible_ssh_host }}:3128"
+    register: req_allowed
+
+  - name: ensure allowed connectivity works
+    assert:
+      that: req_allowed.status == 200
+      fail_msg: "{{ allowed_domains[0] }} should be reachable through the proxy"
+      success_msg: "access to {{ allowed_domains[0] }} has been allowed"
+

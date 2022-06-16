@@ -1,0 +1,24 @@
+---
+- name: install squid
+  become: yes
+  apt:
+    name:
+      - squid
+
+- name: add allow entries
+  become: yes
+  template:
+    dest: /etc/squid/allow.rules
+    src: allow.rules.j2
+  notify: restart squid
+
+- name: setup access control and url lists
+  become: yes
+  blockinfile:
+    dest: /etc/squid/conf.d/rules.conf
+    create: yes
+    block: |
+      acl allowed dstdomain "/etc/squid/allow.rules"
+      http_access allow allowed
+  notify: restart squid
+

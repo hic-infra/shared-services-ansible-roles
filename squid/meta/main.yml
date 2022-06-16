@@ -1,0 +1,14 @@
+galaxy_info:
+  author: Aaron Jackson
+  namespace: hic
+  description: Configures Squid proxy as default deny
+  company: Health Informatics Centre, University of Dundee
+
+  license: license (GPL-2.0-or-later, MIT, etc)
+
+  min_ansible_version: 2.1
+
+  platforms:
+  - name: Ubuntu
+    versions:
+    - 20.04

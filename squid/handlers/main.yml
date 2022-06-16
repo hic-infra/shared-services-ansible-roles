@@ -1,0 +1,8 @@
+---
+- name: restart squid
+  become: yes
+  systemd:
+    name: squid
+    state: restarted
+    enabled: yes
+
