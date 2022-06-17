@@ -1,0 +1,27 @@
+---
+- name: restart httpd
+  become: true
+  systemd:
+    name: apache2
+    state: restarted
+    enabled: true
+
+- name: reload systemd-daemon
+  become: yes
+  systemd:
+    daemon_reload: yes
+
+- name: restart docker
+  become: true
+  systemd:
+    name: docker
+    state: restarted
+    enabled: true
+
+- name: restart mongodb
+  become: true
+  systemd:
+    name: mongodb
+    state: restarted
+    enabled: true
+

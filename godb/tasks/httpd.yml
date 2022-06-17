@@ -1,0 +1,23 @@
+---
+
+- name: install httpd as a reverse proxy
+  become: yes
+  register: httpd
+  apt:
+    name: apache2
+
+- name: enable proxy http module
+  become: yes
+  when: httpd.changed
+  command: a2enmod proxy_http
+  notify: restart httpd
+
+- name: configure proxypass
+  become: yes
+  notify: restart httpd
+  blockinfile:
+    dest: /etc/apache2/sites-available/000-default.conf
+    insertafter: 'DocumentRoot /'
+    block: |
+      ProxyPass / http://localhost:8085/
+      ProxyPassReverse / http://localhost:8085/

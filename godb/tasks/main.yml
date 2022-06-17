@@ -1,0 +1,7 @@
+---
+
+- include_tasks: docker.yml
+- include_tasks: docker-build.yml
+- include_tasks: mongo.yml
+- include_tasks: godb.yml
+- include_tasks: httpd.yml
