@@ -1,3 +1,5 @@
+---
+
 galaxy_info:
   author: Aaron Jackson
   namespace: hic
@@ -9,6 +11,6 @@ galaxy_info:
   min_ansible_version: 2.1
 
   platforms:
-  - name: Ubuntu
-    versions:
-    - 20.04
+    - name: Ubuntu
+      versions:
+        - 20.04

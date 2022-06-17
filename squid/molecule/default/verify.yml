@@ -28,7 +28,7 @@
   - name: test blocked connectivity
     uri:
       url: http://google.com
-      force: yes # avoid hitting cache
+      force: true  # avoid hitting cache
     failed_when: false
     changed_when: false
     environment:
@@ -44,7 +44,7 @@
   - name: test allowed connectivity
     uri:
       url: http://{{ allowed_domains[0] }}
-      force: yes # avoid hitting cache
+      force: true  # avoid hitting cache
     failed_when: false
     changed_when: false
     environment:
@@ -56,4 +56,3 @@
       that: req_allowed.status == 200
       fail_msg: "{{ allowed_domains[0] }} should be reachable through the proxy"
       success_msg: "access to {{ allowed_domains[0] }} has been allowed"
-
