@@ -1,0 +1,63 @@
+---
+
+name: Test roles
+'on':
+  push:
+    branches:
+      - '*'
+    paths-ignore:
+      - '**/*.md'
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+
+  lint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install yamllint
+        run: pip3 install yamllint
+
+      - name: Run yamllint
+        run: |
+          yamllint .
+
+  molecule:
+    name: Run Molecule
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        role:
+          - squid
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install ansible and molecule
+        run: pip3 install ansible molecule[docker] docker
+
+      - name: Run molectule tests
+        run: |
+          pushd ${{ matrix.role }}
+          molecule test
+          popd
+        env:
+          PY_COLORS: 1
+          ANSIBLE_FORCE_COLOR: 1
