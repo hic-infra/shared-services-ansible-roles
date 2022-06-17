@@ -1,19 +1,19 @@
 ---
 
 - name: install httpd as a reverse proxy
-  become: yes
+  become: true
   register: httpd
   apt:
     name: apache2
 
 - name: enable proxy http module
-  become: yes
+  become: true
   when: httpd.changed
   command: a2enmod proxy_http
   notify: restart httpd
 
 - name: configure proxypass
-  become: yes
+  become: true
   notify: restart httpd
   blockinfile:
     dest: /etc/apache2/sites-available/000-default.conf

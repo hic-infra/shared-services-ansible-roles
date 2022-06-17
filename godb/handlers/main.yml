@@ -7,9 +7,9 @@
     enabled: true
 
 - name: reload systemd-daemon
-  become: yes
+  become: true
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: restart docker
   become: true
@@ -24,4 +24,3 @@
     name: mongodb
     state: restarted
     enabled: true
-

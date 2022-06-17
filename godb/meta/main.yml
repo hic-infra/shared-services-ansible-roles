@@ -3,7 +3,8 @@
 galaxy_info:
   author: Aaron Jackson
   namespace: hic
-  description: Sets up GoDB running in a Docker container with httpd reverse proxy
+  description: |
+    Sets up GoDB running in a Docker container with httpd reverse proxy
   company: Health Informatics Centre, University of Dundee
 
   license: license (GPL-2.0-or-later, MIT, etc)

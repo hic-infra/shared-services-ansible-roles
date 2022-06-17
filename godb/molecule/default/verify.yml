@@ -21,7 +21,8 @@
 
   - name: docker is enabled
     assert:
-      that: services.ansible_facts.services['docker.service'].status == "enabled"
+      that: |
+        services.ansible_facts.services['docker.service'].status == "enabled"
       fail_msg: "The docker service is not enabled (set to start at boot)"
       success_msg: "The docker service will start automatically"
 
