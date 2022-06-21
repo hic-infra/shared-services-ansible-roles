@@ -3,8 +3,9 @@
 name: Test roles
 'on':
   push:
-    branches:
-      - '*'
+    paths-ignore:
+      - '**/*.md'
+  pull_request:
     paths-ignore:
       - '**/*.md'
 
