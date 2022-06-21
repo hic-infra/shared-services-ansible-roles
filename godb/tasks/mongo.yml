@@ -1,0 +1,42 @@
+---
+- name: install mongodb
+  become: true
+  notify: restart mongodb
+  apt:
+    name:
+      - mongodb
+      - python3-pymongo
+
+- meta: flush_handlers
+
+- name: create genomicsdb indexes
+  community.mongodb.mongodb_index:
+    indexes:
+      - database: genomicsdb
+        collection: variants
+        keys:
+          rsid: 1
+        options:
+          name: rsid_1
+        state: present
+      - database: genomicsdb
+        collection: variants
+        keys:
+          info: 1
+        options:
+          name: info_1
+        state: present
+      - database: genomicsdb
+        collection: variants
+        keys:
+          chromeosome: 1
+        options:
+          name: chromeosome_1
+        state: present
+      - database: genomicsdb
+        collection: variants
+        keys:
+          position: 1
+        options:
+          name: position_1
+        state: present

@@ -1,0 +1,33 @@
+---
+
+- name: install docker deps
+  become: true
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+
+- name: get docker gpg key
+  become: true
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+
+- name: add docker apt repo
+  become: true
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: install docker
+  become: true
+  notify: restart docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+
+- meta: flush_handlers

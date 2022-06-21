@@ -1,0 +1,43 @@
+---
+
+- name: create systemd file
+  become: true
+  notify: reload systemd-daemon
+  copy:
+    dest: /lib/systemd/system/godb.service
+    content: |
+      [Unit]
+      Description=GoDB container service
+      Requires=docker.service
+      After=docker.service
+      [Service]
+      ExecStart=docker run --rm \
+          -v /home/ubuntu/GoDB:/GoDB \
+          -v /home/ubuntu/data:/data \
+          -p 8085:8085/tcp --name godb godb
+      [Install]
+      WantedBy=multi-user.target
+
+- meta: flush_handlers
+
+- name: clone godb git repo
+  register: clone
+  git:
+    repo: https://github.com/hicresearch/GoDb
+    dest: /home/ubuntu/GoDB
+    version: deploy
+    update: true
+
+- name: create data directory
+  file:
+    path: /home/ubuntu/data/logs
+    recurse: true
+    state: directory
+
+- name: start godb service
+  become: true
+  when: clone.changed
+  systemd:
+    name: godb
+    state: restarted
+    enabled: true

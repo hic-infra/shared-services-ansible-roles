@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: get service status
+    service_facts:
+    register: services
+
+  - name: docker is installed
+    assert:
+      that: services.ansible_facts.services.docker is defined
+      fail_msg: "No docker service exists"
+      success_msg: "docker service found!"
+
+  - name: docker is running
+    assert:
+      that: services.ansible_facts.services['docker.service'].state == "running"
+      fail_msg: "The docker service does not appear to be running"
+      success_msg: "Docker service is running"
+
+  - name: docker is enabled
+    assert:
+      that: |
+        services.ansible_facts.services['docker.service'].status == "enabled"
+      fail_msg: "The docker service is not enabled (set to start at boot)"
+      success_msg: "The docker service will start automatically"
+
+  - name: test container connectivity
+    uri:
+      url: http://127.0.0.1:8085
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: req_container
+
+  - name: GoDB container is reachable
+    assert:
+      that: req_container.status == 200
+      fail_msg: "GoDB container web server is not running"
+      success_msg: "GoDB container web server is running!"
+
+  - name: test reverse proxy connectivity
+    uri:
+      url: http://127.0.0.1:80
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: req_proxy
+
+  - name: GoDB reverse proxy is reachable
+    assert:
+      that: req_proxy.status == 200
+      fail_msg: "GoDB reverse proxy is not running"
+      success_msg: "GoDB reverse proxy is running!"

@@ -1,0 +1,18 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: instance
+    image: docker.io/mpaivabarbosa/molecule-systemd-ubuntu
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/docker
+    privileged: true
+    pre_build_image: false
+    override_command: false
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

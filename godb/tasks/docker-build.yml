@@ -1,0 +1,19 @@
+---
+
+- name: create container build dir
+  file:
+    path: "container"
+    state: directory
+
+- name: copy Dockerfile
+  register: dockerfile
+  copy:
+    src: "Dockerfile"
+    dest: "container/Dockerfile"
+
+- name: build container
+  become: true
+  when: dockerfile.changed
+  shell: |
+    cd container
+    docker build -t godb .
