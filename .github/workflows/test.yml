@@ -27,11 +27,15 @@ jobs:
           python-version: 3.x
 
       - name: Install yamllint
-        run: pip3 install yamllint
+        run: pip3 install yamllint ansible-lint
 
       - name: Run yamllint
         run: |
           yamllint .
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint .
 
   molecule:
     name: Run Molecule
