@@ -20,8 +20,3 @@ provisioner:
           - dundee.ac.uk
 verifier:
   name: ansible
-  inventory:
-    group_vars:
-      all:
-        allowed_domains:
-          - dundee.ac.uk
