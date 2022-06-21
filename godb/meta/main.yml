@@ -14,4 +14,4 @@ galaxy_info:
   platforms:
     - name: Ubuntu
       versions:
-        - 20.04
+        - focal
