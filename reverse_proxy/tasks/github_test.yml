@@ -65,5 +65,3 @@
     git push origin master
   when: test_repo.changed
   register: git_clone
-
-
