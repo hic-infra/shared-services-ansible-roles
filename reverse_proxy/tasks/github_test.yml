@@ -53,6 +53,10 @@
     git init --bare
     git config --local http.receivepack true
 
+
+# prevent race condition for the next set of tasks
+- meta: flush_handlers
+
 - name: make some test commits so it's not an empty repo
   become: true
   shell: |

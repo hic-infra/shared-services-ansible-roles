@@ -33,6 +33,6 @@ server {
       if not want_commit and method ~= "GET" then reject() end
     }
 
-    proxy_pass https://{{ "localhost:8888" if test else "github.com" }};
+    proxy_pass {{ "http://localhost:8888" if test else "https://github.com" }};
   }
 }
