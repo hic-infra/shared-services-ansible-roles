@@ -1,0 +1,69 @@
+---
+
+- name: add our github test proxy config if we are testing
+  become: true
+  template:
+    dest: /etc/nginx/sites-enabled/github_test.conf
+    src: github_test.conf.j2
+  notify: restart nginx
+
+- name: install dependencies for testing
+  become: true
+  apt:
+    name:
+      - python3-passlib   # for ansible htpasswd module
+      - fcgiwrap          # for running git smart http service
+  notify: restart fcgiwrap
+
+- name: generate a dummy htpasswd for testing auth through reverse proxy
+  become: true
+  community.general.htpasswd:
+    path: /etc/nginx/.gitpasswd
+    name: user
+    password: password
+    owner: root
+    group: www-data
+    mode: 0640
+
+- name: generate /srv/git with correct permissions
+  become: true
+  file:
+    path: /srv/git
+    state: directory
+    owner: root
+    group: www-data
+    mode: 0770
+
+- name: create empty repo directory
+  become: true
+  file:
+    path: /srv/git/test.git
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0770
+  register: test_repo
+
+- name: init bare repo
+  become: true
+  become_user: www-data
+  when: test_repo.changed
+  shell: |
+    cd /srv/git/test.git
+    git init --bare
+    git config --local http.receivepack true
+
+- name: make some test commits so it's not an empty repo
+  become: true
+  shell: |
+    [ -d test ] && rm -rf test
+    git clone http://user:password@localhost:8888/test.git
+    cd test
+    echo test file > test
+    git add test
+    git commit -m "Test file commit"
+    git push origin master
+  when: test_repo.changed
+  register: git_clone
+
+
