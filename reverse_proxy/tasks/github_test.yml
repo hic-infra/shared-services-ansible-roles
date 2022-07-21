@@ -57,6 +57,15 @@
 # prevent race condition for the next set of tasks
 - meta: flush_handlers
 
+- name: set up a git config
+  become: true
+  copy:
+    dest: /root/.gitconfig
+    content: |
+      [user]
+          email = root@localhost
+          name = Charlie Root
+
 - name: make some test commits so it's not an empty repo
   become: true
   shell: |
