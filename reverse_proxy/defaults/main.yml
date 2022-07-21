@@ -1,0 +1,6 @@
+---
+# e.g. github.{{zone}} or cran.{{zone}}
+zone: hic-tre.dundee.ac.uk
+
+# If test is set to true, we will also provision a git smart http service.
+test: false

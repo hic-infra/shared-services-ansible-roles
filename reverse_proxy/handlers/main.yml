@@ -1,0 +1,14 @@
+---
+- name: restart nginx
+  become: true
+  systemd:
+    name: nginx
+    state: restarted
+    enabled: true
+
+- name: restart fcgiwrap
+  become: true
+  systemd:
+    name: fcgiwrap
+    state: restarted
+    enabled: true
