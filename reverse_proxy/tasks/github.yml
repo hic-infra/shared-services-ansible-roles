@@ -1,0 +1,11 @@
+---
+
+- name: add our github reverse proxy config
+  become: true
+  template:
+    dest: /etc/nginx/sites-enabled/github.conf
+    src: github.conf.j2
+  notify: restart nginx
+
+################################################################################
+# If we are testing...

@@ -1,0 +1,16 @@
+---
+
+galaxy_info:
+  author: Aaron Jackson
+  namespace: hic
+  description: Configures nginx as a reverse proxy for accessing services ingress only
+  company: Health Informatics Centre, University of Dundee
+
+  license: MIT
+
+  min_ansible_version: "2.1"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal

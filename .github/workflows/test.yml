@@ -48,6 +48,7 @@ jobs:
         role:
           - squid
           - godb
+          - reverse_proxy
 
     steps:
       - name: Checkout
