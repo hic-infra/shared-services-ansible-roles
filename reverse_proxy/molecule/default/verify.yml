@@ -1,0 +1,52 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: get service status
+    service_facts:
+    register: services
+
+  - name: nginx is installed
+    assert:
+      that: services.ansible_facts.services.nginx is defined
+      fail_msg: "No nginx service was defined"
+      success_msg: "Nginx service found!"
+
+  - name: nginx is running
+    assert:
+      that: services.ansible_facts.services['nginx.service'].state == "running"
+      fail_msg: "The nginx service does not appear to be running"
+      success_msg: "Nginx service is running"
+
+  - name: nginx is enabled
+    assert:
+      that: services.ansible_facts.services['nginx.service'].status == "enabled"
+      fail_msg: "The nginx service is not enabled (set to start at boot)"
+      success_msg: "The nginx service will start automatically"
+
+  - name: clean up from previous verify
+    file:
+      path: repo
+      state: absent
+    changed_when: false
+
+  - name: interact with with git via smart http directly
+    become: true
+    shell: |
+      git clone http://user:password@localhost:8888/test.git repo
+      cd repo
+      git status
+      git pull origin master
+      echo hello > another
+      git add another
+      git commit -m "another file"
+      git push origin master
+    register: git_direct
+    changed_when: false
+
+  - name: ensure git clone of a public repo was successful
+    assert:
+      that: git_direct.rc == 0
+      fail_msg: "Cloning a public repo failed"
+      success_msg: "Cloning a public repo was successful"
