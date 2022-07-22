@@ -33,10 +33,15 @@ server {
       file:write(res.body)
       file:close()
 
+      local t_start = os.clock()
       local ret = os.execute("/opt/sophos-spl/plugins/av/bin/avscanner " .. path)
+      local t_end = os.clock()
+
+      os.remove(path)
 
       ngx.header["X-Sophos-Return-Code"] = tostring(ret)
       ngx.header["X-Sophos-Temporary-File"] = path
+      ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
 
       if ret == 0 then
         ngx.say(res.body)
