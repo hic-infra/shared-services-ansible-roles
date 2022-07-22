@@ -49,7 +49,7 @@
     become: true
     shell: |
       [ -d repo ] && rm -rf repo
-      git clone http://user:password@localhost/test.git repo
+      git clone http://user:password@github.{{zone}}/test.git repo
       cd repo
       git status
       git pull origin master
