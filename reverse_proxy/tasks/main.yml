@@ -15,3 +15,5 @@
 - include_tasks: github.yml
 - include_tasks: github_test.yml
   when: test
+
+- include_tasks: cran.yml
