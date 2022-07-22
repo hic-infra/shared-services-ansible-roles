@@ -1,0 +1,19 @@
+server {
+  listen 80;
+  server_name cran.{{zone}};
+
+  location / {
+    access_by_lua_block {
+      function reject ()
+        ngx.exit(403)
+      end
+
+      local method = ngx.var.request_method
+      if method ~= "GET" then
+        reject()
+      end
+    }
+
+    proxy_pass {{cran_mirror}};
+  }
+}
