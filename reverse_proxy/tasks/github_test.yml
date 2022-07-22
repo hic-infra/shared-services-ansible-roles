@@ -7,6 +7,11 @@
     src: github_test.conf.j2
   notify: restart nginx
 
+- name: add testing endpoint to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: 127.0.0.1 github.{{zone}}
+
 - name: install dependencies for testing
   become: true
   apt:
