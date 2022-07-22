@@ -12,19 +12,30 @@ server {
     if ($request_uri ~ /cran-fetch) { break; }
 
     # ensure we are only processing GET requests
-    access_by_lua_block {
+    rewrite_by_lua_block {
       function reject ()
         ngx.exit(403)
+      end
+
+      function ends_with (s, e)
+        return s:sub(-#e) == e
       end
 
       local method = ngx.var.request_method
       if method ~= "GET" then
         reject()
       end
-    }
 
-    # rewrite the request so we have an opportunity to scan the file
-    rewrite_by_lua_block {
+      local valid = false
+      local extensions = {
+        '.html', '.css', '.svg', '.tar.gz', '.tar.bzip', '.zip'
+      }
+      for e=1,#extensions do
+        valid = valid or ends_with(ngx.var.uri, extensions[e])
+      end
+
+      if not valid then reject() end
+
       local res = ngx.location.capture("/cran-fetch" .. ngx.var.uri);
 
       local path = os.tmpname()
@@ -49,7 +60,6 @@ server {
         ngx.header["Content-Type"] = "text/plain"
         ngx.say("Mallicious content was detected in the requested file.")
       end
-
     }
   }
 }
