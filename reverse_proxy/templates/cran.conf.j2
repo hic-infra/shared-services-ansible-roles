@@ -2,7 +2,16 @@ server {
   listen 80;
   server_name cran.{{zone}};
 
+  location /cran-fetch {
+    internal;
+    proxy_pass {{cran_mirror}};
+  }
+
   location / {
+    # prevent cyclic location.capture
+    if ($request_uri ~ /cran-fetch) { break; }
+
+    # ensure we are only processing GET requests
     access_by_lua_block {
       function reject ()
         ngx.exit(403)
@@ -14,6 +23,22 @@ server {
       end
     }
 
-    proxy_pass {{cran_mirror}};
+    # rewrite the request so we have an opportunity to scan the file
+    rewrite_by_lua_block {
+      local res = ngx.location.capture("/cran-fetch" .. ngx.var.uri);
+
+      local path = os.tmpname()
+
+      local file = io.open(path, "w")
+      file:write(res.body)
+      file:close()
+
+      local ret = os.execute("/opt/sophos-spl/plugins/av/bin/avscanner " .. path)
+
+      ngx.header["X-Sophos-Return-Code"] = tostring(ret)
+      ngx.header["X-Sophos-Temporary-File"] = path
+
+    }
   }
 }
+
