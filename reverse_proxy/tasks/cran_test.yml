@@ -1,0 +1,6 @@
+---
+
+- name: add testing endpoint to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: 127.0.0.1 cran.{{zone}}
