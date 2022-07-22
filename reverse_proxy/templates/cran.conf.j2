@@ -28,7 +28,7 @@ server {
 
       local valid = false
       local extensions = {
-        '.html', '.css', '.svg', '.tar.gz', '.tar.bzip', '.zip'
+        '.html', '.css', '.svg', '.tar.gz', '.tar.bzip', '.zip', "PACKAGES"
       }
       for e=1,#extensions do
         valid = valid or ends_with(ngx.var.uri, extensions[e])
