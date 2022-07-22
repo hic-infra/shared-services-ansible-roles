@@ -17,3 +17,5 @@
   when: test
 
 - include_tasks: cran.yml
+- include_tasks: cran_test.yml
+  when: test

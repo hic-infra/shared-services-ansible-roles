@@ -17,5 +17,6 @@ provisioner:
     group_vars:
       all:
         test: true
+        zone: localhost
 verifier:
   name: ansible
