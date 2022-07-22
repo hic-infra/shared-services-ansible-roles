@@ -6,3 +6,16 @@
     path: /etc/hosts
     line: 127.0.0.1 cran.{{zone}}
     unsafe_writes: true # issue with testing inside a container
+- name: create faux sophos-spl installation
+  become: true
+  file:
+    state: directory
+    recurse: true
+    dest: /opt/sophos-spl/plugins/av/bin
+
+- name: create a faux avscanner tool
+  become: true
+  file:
+    state: link
+    src: /usr/bin/true
+    dest: /opt/sophos-spl/plugins/av/bin/avscanner
