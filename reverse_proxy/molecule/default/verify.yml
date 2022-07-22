@@ -25,6 +25,9 @@
       fail_msg: "The nginx service is not enabled (set to start at boot)"
       success_msg: "The nginx service will start automatically"
 
+######################################################################
+# git-test tests
+
   - name: interact with with git via smart http directly
     become: true
     shell: |
@@ -44,6 +47,10 @@
       that: git_direct.rc == 0
       fail_msg: "Cloning a public repo failed"
       success_msg: "Cloning a public repo was successful"
+
+
+######################################################################
+# git proxy tests
 
   - name: pull via proxy
     become: true
@@ -78,3 +85,93 @@
       that: git_push_proxy.rc != 0
       fail_msg: "Git push via the proxy should not have succeeded!"
       success_msg: "Pushing via proxy failed."
+
+######################################################################
+# cran proxy tests
+
+  - name: test connection to /
+    uri:
+      url: http://cran.{{zone}}/
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_root
+
+  - name: test connection to /
+    assert:
+      that: r_curl_root.status == 403
+      fail_msg: "CRAN mirror requests without file extensions should fail"
+      success_msg: "Request without file extension was successfully blocked"
+
+  - name: test connection to /index.html
+    uri:
+      url: http://cran.{{zone}}/index.html
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_html
+
+  - name: test connection to /index.html
+    assert:
+      that: r_curl_html.status == 200
+      fail_msg: "Request to valid file extension was not blocked."
+      success_msg: "Request with valid file extension was accepted"
+
+  - name: test connection to /index.php
+    uri:
+      url: http://cran.{{zone}}/index.php
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_php
+
+  - name: test connection to /index.php
+    assert:
+      that: r_curl_php.status == 403
+      fail_msg: "Request to invalid file extension was not blocked."
+      success_msg: "Request to invlaid file extension was blocked."
+
+  - name: r package installation
+    shell:
+      cmd: |
+        rm -rf /usr/local/lib/R/site-library/ggplot2 # remove if installed
+        /usr/bin/R --no-save <<RPROG
+        install.packages("ggplot2", repos="http://cran.{{zone}}")
+        library('ggplot2')
+        q()
+        RPROG
+    failed_when: false
+    changed_when: false
+    register: r_install
+
+  - name: ensure r package installed successfully
+    assert:
+      that: r_install.rc == 0
+      fail_msg: "Failed to install R package (ggplot2) from local proxy"
+      success_msg: "R package (ggplot2) was successfully installed via local proxy"
+
+  - name: check avscanner headers
+    uri:
+      url: http://cran.{{zone}}/index.html
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_headers
+
+  - name: verify X-Sophos-Return-Code header is set and zero
+    assert:
+      that: r_curl_headers.x_sophos_return_code == "0"
+      fail_msg: "Missing header X-Sophos-Return-Code"
+      success_msg: "Header X-Sophos-Return-Code was set"
+
+  - name: verify X-Sophos-Scan-Timer header is set
+    assert:
+      that: r_curl_headers.x_sophos_scan_timer
+      fail_msg: "Missing header X-Sophos-Scan-Timer"
+      success_msg: "Header X-Sophos-Scan-Timer was set"
+
+  - name: verify X-Sophos-Temporary-File header is set
+    assert:
+      that: r_curl_headers.x_sophos_temporary_file
+      fail_msg: "Missing header X-Sophos-Temporary-File"
+      success_msg: "Header X-Sophos-Temporary-File was set"
