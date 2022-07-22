@@ -4,3 +4,7 @@ zone: hic-tre.dundee.ac.uk
 
 # If test is set to true, we will also provision a git smart http service.
 test: false
+
+# cran mirror
+#cran_mirror: https://www.stats.bris.ac.uk/R/
+cran_mirror: https://cran.ma.imperial.ac.uk/
