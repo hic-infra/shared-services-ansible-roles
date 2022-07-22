@@ -38,6 +38,13 @@ server {
       ngx.header["X-Sophos-Return-Code"] = tostring(ret)
       ngx.header["X-Sophos-Temporary-File"] = path
 
+      if ret == 0 then
+        ngx.say(res.body)
+      else
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.say("Mallicious content was detected in the requested file.")
+      end
+
     }
   }
 }
