@@ -12,10 +12,6 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
-- include_tasks: github.yml
-- include_tasks: github_test.yml
-  when: test
-
 - include_tasks: cran.yml
 - include_tasks: cran_test.yml
   when: test
