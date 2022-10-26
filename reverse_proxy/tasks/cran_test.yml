@@ -15,6 +15,19 @@
       - build-essential
     install_recommends: false
 
+- name: install ClamAV for a more proper test
+  become: true
+  apt:
+    name:
+      - clamav
+    install_recommends: false
+  register: clamav_install
+
+- name: Download ClamAV virus database
+  become: true
+  command: freshclam
+  when: clamav_install.changed
+
 - name: create faux sophos-spl installation
   become: true
   file:
@@ -26,5 +39,5 @@
   become: true
   file:
     state: link
-    src: /usr/bin/true
+    src: /usr/bin/clamscan
     dest: /opt/sophos-spl/plugins/av/bin/avscanner
