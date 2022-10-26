@@ -1,14 +1,14 @@
 ---
 - name: restart nginx
   become: true
-  systemd:
+  service:
     name: nginx
     state: restarted
     enabled: true
 
 - name: restart fcgiwrap
   become: true
-  systemd:
+  service:
     name: fcgiwrap
     state: restarted
     enabled: true
