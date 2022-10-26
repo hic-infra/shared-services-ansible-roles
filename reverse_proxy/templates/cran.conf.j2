@@ -2,11 +2,14 @@ server {
   listen 80;
   server_name cran.{{zone}};
 
+  # Internal only endpoint for performing a proxy pass to the cran mirror.
   location /cran-fetch {
     internal;
     proxy_pass {{cran_mirror}};
   }
 
+  # Define an EICAR endpoint for verifying that the reverse proxy is
+  # scanning correctly.
   location /cran-fetch/eicar.zip {
     internal;
     rewrite_by_lua_block {
@@ -28,11 +31,16 @@ server {
         return s:sub(-#e) == e
       end
 
+      -- Verify that the request method is GET, since PUT and POST are more likely
+      -- to lead to egress (in the worst case...)
       local method = ngx.var.request_method
       if method ~= "GET" then
         reject()
       end
 
+      -- Define a list of valid file extensions. CRAN packages always use .tar.gz,
+      -- .tar.bzip or .zip. PACKAGES is needed for the package listing. Some additional
+      -- web files (e.g. html and css) are included for browsing the mirror in browser.
       local valid = false
       local extensions = {
         '.html', '.css', '.svg', '.tar.gz', '.tar.bzip', '.zip', "PACKAGES"
@@ -43,6 +51,8 @@ server {
 
       if not valid then reject() end
 
+      -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
+      -- "/cran-fetch" is passed to the configured cran mirror.
       local res = ngx.location.capture("/cran-fetch" .. ngx.var.uri);
 
       local path = os.tmpname()
@@ -51,12 +61,14 @@ server {
       file:write(res.body)
       file:close()
 
+      -- Launch the antivirus scanner on the temporary file.
       local t_start = os.clock()
       local ret = os.execute("/opt/sophos-spl/plugins/av/bin/avscanner " .. path)
       local t_end = os.clock()
 
       os.remove(path)
 
+      -- Add some headers for debugging and verifying things are working. :)
       ngx.header["X-Sophos-Return-Code"] = tostring(ret)
       ngx.header["X-Sophos-Temporary-File"] = path
       ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
