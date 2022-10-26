@@ -2,7 +2,7 @@
 
 See repository root for license information.
 
-This Ansible roles automates the deployment of an nginx reverse proxy,
+This Ansible role automates the deployment of an nginx reverse proxy,
 configured to proxy traffic to GitHub. This allows us to define some
 rules to prevent data egress via git push, while still supporting
 clone, pull and fetch etc.
