@@ -118,7 +118,7 @@
     changed_when: false
     register: eicar_result
 
-  - name: verify X-Sophos-Return-Code header is set and zero
+  - name: verify X-Sophos-Return-Code header is set and not zero
     assert:
       that: eicar_result.x_sophos_return_code != "0"
       fail_msg: "X-Sophos-Return-Code claims the EICAR is safe!"
