@@ -73,6 +73,7 @@
         library('ggplot2')
         q()
         RPROG
+        ls /usr/local/lib/R/site-library/ggplot2
     failed_when: false
     changed_when: false
     register: r_install
