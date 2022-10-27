@@ -130,3 +130,13 @@
       that: '"Mallicious content was detected" in eicar_result.content'
       fail_msg: "The body of EICAR response does not state that malicious content was detected."
       success_msg: "Body of EICAR safely replaced with error about malicious content"
+
+  - name: debug
+    debug:
+      var: eicar_result
+
+  - name: verify EICAR response status is BAD GATEWAY
+    assert:
+      that: eicar_result.status == 502
+      fail_msg: "Incorrect HTTP response status for EICAR"
+      success_msg: "EICAR request successfully responds with BAD GATEWAY"

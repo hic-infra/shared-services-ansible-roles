@@ -24,7 +24,7 @@ server {
     # ensure we are only processing GET requests
     rewrite_by_lua_block {
       function reject ()
-        ngx.exit(403)
+        ngx.exit(ngx.HTTP_FORBIDDEN)
       end
 
       function ends_with (s, e)
@@ -76,8 +76,10 @@ server {
       if ret == 0 then
         ngx.say(res.body)
       else
+        ngx.status = ngx.HTTP_BAD_GATEWAY
         ngx.header["Content-Type"] = "text/plain"
         ngx.say("Mallicious content was detected in the requested file.")
+	ngx.exit(ngx.HTTP_OK)
       end
     }
   }
