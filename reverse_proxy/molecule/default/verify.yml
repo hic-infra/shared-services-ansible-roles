@@ -114,6 +114,7 @@
     uri:
       url: http://cran.{{zone}}/eicar.zip
       force: true  # avoid hitting cache
+      return_content: true
     failed_when: false
     changed_when: false
     register: eicar_result
@@ -123,3 +124,9 @@
       that: eicar_result.x_sophos_return_code != "0"
       fail_msg: "X-Sophos-Return-Code claims the EICAR is safe!"
       success_msg: "Header X-Sophos-Return-Code correctly indicates malicious content"
+
+  - name: verify the contents of EICAR is not EICAR
+    assert:
+      that: '"Mallicious content was detected" in eicar_result.content'
+      fail_msg: "The body of EICAR response does not state that malicious content was detected."
+      success_msg: "Body of EICAR safely replaced with error about malicious content"
