@@ -10,7 +10,7 @@ server {
 
   # Define an EICAR endpoint for verifying that the reverse proxy is
   # scanning correctly.
-  location /cran-fetch/eicar.zip {
+  location /cran-fetch/src/contrib/eicar.tar.gz {
     internal;
     rewrite_by_lua_block {
       ngx.say("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
@@ -24,12 +24,22 @@ server {
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
 
+      function tlen (t)
+        local c = 0
+	for _ in pairs(t) do c = c + 1 end
+	return c
+      end
+
       -- Verify that the request method is GET, since PUT and POST are more likely
       -- to lead to egress (in the worst case...)
       local method = ngx.var.request_method
       if method ~= "GET" then
         reject()
       end
+
+      -- Ensure no GET parameters have been included
+      local args, _ = ngx.req.get_uri_args()
+      if tlen(args) > 0 then reject() end
 
       -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
       -- "/cran-fetch" is passed to the configured cran mirror.

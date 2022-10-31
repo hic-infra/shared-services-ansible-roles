@@ -50,6 +50,20 @@
       fail_msg: "Request to invalid file extension was not blocked."
       success_msg: "Request to invlaid file extension was blocked."
 
+  - name: test connection to /src/contrib/PACKAGES
+    uri:
+      url: http://cran.{{zone}}/src/contrib/PACKAGES
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_packages
+
+  - name: test connection to /src/contrib/PACKAGES
+    assert:
+      that: r_curl_packages.status == 200
+      fail_msg: "Request to valid file extension was blocked."
+      success_msg: "Request to valid file extension was not blocked."
+
   - name: r package installation
     shell:
       cmd: |
@@ -72,7 +86,7 @@
 
   - name: check avscanner headers
     uri:
-      url: http://cran.{{zone}}/index.html
+      url: http://cran.{{zone}}/bin/windows/contrib/4.3/PACKAGES
       force: true  # avoid hitting cache
     failed_when: false
     changed_when: false
@@ -98,7 +112,7 @@
 
   - name: Test EICAR
     uri:
-      url: http://cran.{{zone}}/eicar.zip
+      url: http://cran.{{zone}}/src/contrib/eicar.tar.gz
       force: true  # avoid hitting cache
       return_content: true
     failed_when: false
@@ -122,3 +136,18 @@
       that: eicar_result.status == 502
       fail_msg: "Incorrect HTTP response status for EICAR"
       success_msg: "EICAR request successfully responds with BAD GATEWAY"
+
+  - name: Verify that GET parameters aren't accepted
+    uri:
+      url: http://cran.{{zone}}/src/contrib/PACKAGES?q=test&query=yes
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_query
+
+  - name: Verify that the GET parameters aren't accepted
+    assert:
+      that: r_curl_query.status == 403
+      fail_msg: "GET queries should fail"
+      success_msg: "GET query was sucessfully blocked"
+
