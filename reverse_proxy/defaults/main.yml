@@ -6,5 +6,5 @@ zone: tre.example.org
 test: false
 
 # cran mirror
-#cran_mirror: https://www.stats.bris.ac.uk/R/
 cran_mirror: https://cran.ma.imperial.ac.uk/
+cran_regex: ^/(bin/windows|src)/contrib/(4\.3|3\.6)*/*[a-zA-Z0-9_\.]*(\.tar\.gz|\.zip|PACKAGES)$

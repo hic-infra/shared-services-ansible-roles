@@ -17,18 +17,11 @@ server {
     }
   }
 
-  location / {
-    # prevent cyclic location.capture
-    if ($request_uri ~ /cran-fetch) { break; }
-
+  location ~ {{cran_regex}} {
     # ensure we are only processing GET requests
     rewrite_by_lua_block {
       function reject ()
         ngx.exit(ngx.HTTP_FORBIDDEN)
-      end
-
-      function ends_with (s, e)
-        return s:sub(-#e) == e
       end
 
       -- Verify that the request method is GET, since PUT and POST are more likely
@@ -37,19 +30,6 @@ server {
       if method ~= "GET" then
         reject()
       end
-
-      -- Define a list of valid file extensions. CRAN packages always use .tar.gz,
-      -- .tar.bzip or .zip. PACKAGES is needed for the package listing. Some additional
-      -- web files (e.g. html and css) are included for browsing the mirror in browser.
-      local valid = false
-      local extensions = {
-        '.html', '.css', '.svg', '.tar.gz', '.tar.bzip', '.zip', "PACKAGES"
-      }
-      for e=1,#extensions do
-        valid = valid or ends_with(ngx.var.uri, extensions[e])
-      end
-
-      if not valid then reject() end
 
       -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
       -- "/cran-fetch" is passed to the configured cran mirror.
@@ -78,10 +58,15 @@ server {
       else
         ngx.status = ngx.HTTP_BAD_GATEWAY
         ngx.header["Content-Type"] = "text/plain"
-        ngx.say("Mallicious content was detected in the requested file.")
+        ngx.say("Malicious content was detected in the requested file.")
 	ngx.exit(ngx.HTTP_OK)
       end
     }
+  }
+
+  location / {
+    # Default to HTTP Forbidden
+    return 403;
   }
 }
 
