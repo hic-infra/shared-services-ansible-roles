@@ -36,20 +36,6 @@
       fail_msg: "CRAN mirror requests without file extensions should fail"
       success_msg: "Request without file extension was successfully blocked"
 
-  - name: test connection to /index.html
-    uri:
-      url: http://cran.{{zone}}/index.html
-      force: true  # avoid hitting cache
-    failed_when: false
-    changed_when: false
-    register: r_curl_html
-
-  - name: test connection to /index.html
-    assert:
-      that: r_curl_html.status == 200
-      fail_msg: "Request to valid file extension was not blocked."
-      success_msg: "Request with valid file extension was accepted"
-
   - name: test connection to /index.php
     uri:
       url: http://cran.{{zone}}/index.php
@@ -127,7 +113,7 @@
 
   - name: verify the contents of EICAR is not EICAR
     assert:
-      that: '"Mallicious content was detected" in eicar_result.content'
+      that: '"Malicious content was detected" in eicar_result.content'
       fail_msg: "The body of EICAR response does not state that malicious content was detected."
       success_msg: "Body of EICAR safely replaced with error about malicious content"
 
