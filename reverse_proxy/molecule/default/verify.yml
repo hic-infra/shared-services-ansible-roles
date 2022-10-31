@@ -150,4 +150,3 @@
       that: r_curl_query.status == 403
       fail_msg: "GET queries should fail"
       success_msg: "GET query was sucessfully blocked"
-
