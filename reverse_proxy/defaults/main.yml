@@ -2,9 +2,6 @@
 # e.g. github.{{zone}} or cran.{{zone}}
 zone: tre.example.org
 
-# If test is set to true, we will also provision a git smart http service.
-test: false
-
 # cran mirror
 cran_mirror: https://cran.ma.imperial.ac.uk/
 cran_regex: ^/(bin/windows|src)/contrib/(4\.3|3\.6)*/*[a-zA-Z0-9_\-\.]*(\.tar\.gz|\.zip|PACKAGES)$
