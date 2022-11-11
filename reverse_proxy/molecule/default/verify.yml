@@ -48,7 +48,7 @@
     assert:
       that: r_curl_php.status == 403
       fail_msg: "Request to invalid file extension was not blocked."
-      success_msg: "Request to invlaid file extension was blocked."
+      success_msg: "Request to invalid file extension was blocked."
 
   - name: test connection to /src/contrib/PACKAGES
     uri:
