@@ -1,0 +1,15 @@
+---
+- name: install nginx
+  become: true
+  apt:
+    name:
+      - nginx-extras # for proxying
+      - git # for testing
+
+- name: remove default site configuration
+  become: true
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- include_tasks: cran.yml

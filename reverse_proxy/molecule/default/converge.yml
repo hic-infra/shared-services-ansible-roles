@@ -1,0 +1,57 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include hic.reverse_proxy"
+      include_role:
+        name: "hic.reverse_proxy"
+
+    - name: add testing endpoint to /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1 cran.{{zone}}
+        unsafe_writes: true # issue with testing inside a container
+
+    - name: install R for testing package installation
+      become: true
+      apt:
+        name:
+          - r-base
+          - build-essential
+        install_recommends: false
+
+    - name: install ClamAV for a more proper test
+      become: true
+      apt:
+        name:
+          - clamav
+        install_recommends: false
+      register: clamav_install
+
+    - name: Create an EICAR file
+      copy:
+        content: |
+          X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+        dest: /tmp/eicar.txt
+
+    - name: Create a dummy database
+      become: true
+      shell: sigtool --sha256 /tmp/eicar.txt > /tmp/clamav.hdb
+      when: clamav_install.changed
+
+    - name: create faux sophos-spl installation
+      become: true
+      file:
+        state: directory
+        recurse: true
+        dest: /opt/sophos-spl/plugins/av/bin
+
+    - name: create a faux avscanner tool
+      become: true
+      copy:
+        content: |
+          #!/bin/bash
+          /usr/bin/clamscan -d /tmp/clamav.hdb $1
+        dest: /opt/sophos-spl/plugins/av/bin/avscanner
+        mode: u+rwx,g+rx,o+rx

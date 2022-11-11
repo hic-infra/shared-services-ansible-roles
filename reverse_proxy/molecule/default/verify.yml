@@ -1,0 +1,152 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+  - name: get service status
+    service_facts:
+    register: services
+
+  - name: nginx is installed
+    assert:
+      that: services.ansible_facts.services.nginx is defined
+      fail_msg: "No nginx service was defined"
+      success_msg: "Nginx service found!"
+
+  - name: nginx is running
+    assert:
+      that: services.ansible_facts.services['nginx'].state == "running"
+      fail_msg: "The nginx service does not appear to be running"
+      success_msg: "Nginx service is running"
+
+######################################################################
+# cran proxy tests
+
+  - name: test connection to /
+    uri:
+      url: http://cran.{{zone}}/
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_root
+
+  - name: test connection to /
+    assert:
+      that: r_curl_root.status == 403
+      fail_msg: "CRAN mirror requests without file extensions should fail"
+      success_msg: "Request without file extension was successfully blocked"
+
+  - name: test connection to /index.php
+    uri:
+      url: http://cran.{{zone}}/index.php
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_php
+
+  - name: test connection to /index.php
+    assert:
+      that: r_curl_php.status == 403
+      fail_msg: "Request to invalid file extension was not blocked."
+      success_msg: "Request to invalid file extension was blocked."
+
+  - name: test connection to /src/contrib/PACKAGES
+    uri:
+      url: http://cran.{{zone}}/src/contrib/PACKAGES
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_packages
+
+  - name: test connection to /src/contrib/PACKAGES
+    assert:
+      that: r_curl_packages.status == 200
+      fail_msg: "Request to valid file extension was blocked."
+      success_msg: "Request to valid file extension was not blocked."
+
+  - name: r package installation
+    shell:
+      cmd: |
+        rm -rf /usr/local/lib/R/site-library/ggplot2 # remove if installed
+        /usr/bin/R --no-save <<RPROG
+        install.packages("ggplot2", repos="http://cran.{{zone}}")
+        library('ggplot2')
+        q()
+        RPROG
+        ls /usr/local/lib/R/site-library/ggplot2
+    failed_when: false
+    changed_when: false
+    register: r_install
+
+  - name: ensure r package installed successfully
+    assert:
+      that: r_install.rc == 0
+      fail_msg: "Failed to install R package (ggplot2) from local proxy"
+      success_msg: "R package (ggplot2) was successfully installed via local proxy"
+
+  - name: check avscanner headers
+    uri:
+      url: http://cran.{{zone}}/bin/windows/contrib/4.3/PACKAGES
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_headers
+
+  - name: verify X-Sophos-Return-Code header is set and zero
+    assert:
+      that: r_curl_headers.x_sophos_return_code == "0"
+      fail_msg: "Missing header X-Sophos-Return-Code"
+      success_msg: "Header X-Sophos-Return-Code was set"
+
+  - name: verify X-Sophos-Scan-Timer header is set
+    assert:
+      that: r_curl_headers.x_sophos_scan_timer
+      fail_msg: "Missing header X-Sophos-Scan-Timer"
+      success_msg: "Header X-Sophos-Scan-Timer was set"
+
+  - name: verify X-Sophos-Temporary-File header is set
+    assert:
+      that: r_curl_headers.x_sophos_temporary_file
+      fail_msg: "Missing header X-Sophos-Temporary-File"
+      success_msg: "Header X-Sophos-Temporary-File was set"
+
+  - name: Test EICAR
+    uri:
+      url: http://cran.{{zone}}/src/contrib/eicar.tar.gz
+      force: true  # avoid hitting cache
+      return_content: true
+    failed_when: false
+    changed_when: false
+    register: eicar_result
+
+  - name: verify X-Sophos-Return-Code header is set and not zero
+    assert:
+      that: eicar_result.x_sophos_return_code != "0"
+      fail_msg: "X-Sophos-Return-Code claims the EICAR is safe!"
+      success_msg: "Header X-Sophos-Return-Code correctly indicates malicious content"
+
+  - name: verify the contents of EICAR is not EICAR
+    assert:
+      that: '"Malicious content was detected" in eicar_result.content'
+      fail_msg: "The body of EICAR response does not state that malicious content was detected."
+      success_msg: "Body of EICAR safely replaced with error about malicious content"
+
+  - name: verify EICAR response status is BAD GATEWAY
+    assert:
+      that: eicar_result.status == 502
+      fail_msg: "Incorrect HTTP response status for EICAR"
+      success_msg: "EICAR request successfully responds with BAD GATEWAY"
+
+  - name: Verify that GET parameters aren't accepted
+    uri:
+      url: http://cran.{{zone}}/src/contrib/PACKAGES?q=test&query=yes
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: r_curl_query
+
+  - name: Verify that the GET parameters aren't accepted
+    assert:
+      that: r_curl_query.status == 403
+      fail_msg: "GET queries should fail"
+      success_msg: "GET query was sucessfully blocked"

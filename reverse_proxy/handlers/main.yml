@@ -1,0 +1,14 @@
+---
+- name: restart nginx
+  become: true
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+
+- name: restart fcgiwrap
+  become: true
+  service:
+    name: fcgiwrap
+    state: restarted
+    enabled: true
