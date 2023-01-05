@@ -56,4 +56,3 @@
       - /home/ubuntu/data:/data
     ports:
       - 8085:8085
-
