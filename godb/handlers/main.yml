@@ -8,8 +8,9 @@
 
 - name: reload systemd-daemon
   become: true
-  systemctl:
+  systemd:
     daemon_reload: true
+  when: ansible_facts.service_mgr == 'systemd'
 
 - name: restart docker
   become: true

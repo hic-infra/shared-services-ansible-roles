@@ -36,8 +36,24 @@
 
 - name: start godb service
   become: true
-  when: clone.changed
-  systemd:
+  when: clone.changed and ansible_facts.service_mgr == 'systemd'
+  service:
     name: godb
     state: restarted
     enabled: true
+
+- name: start godb container (when systemd is not available)
+  become: true
+  when: clone.changed and ansible_facts.service_mgr != 'systemd'
+  docker_container:
+    name: godb
+    image: godb:latest
+    state: started
+    restart: yes
+    auto_remove: yes
+    volumes:
+      - /home/ubuntu/GoDB:/GoDB
+      - /home/ubuntu/data:/data
+    ports:
+      - 8085:8085
+

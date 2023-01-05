@@ -15,15 +15,16 @@
 
   - name: squid is running
     assert:
-      that: services.ansible_facts.services['squid.service'].state == "running"
+      that: services.ansible_facts.services['squid'].state == "running"
       fail_msg: "The squid service does not appear to be running"
       success_msg: "Squid service is running"
 
-  - name: squid is enabled
-    assert:
-      that: services.ansible_facts.services['squid.service'].status == "enabled"
-      fail_msg: "The squid service is not enabled (set to start at boot)"
-      success_msg: "The squid service will start automatically"
+# sysv service backend does not report enabled
+#  - name: squid is enabled
+#    assert:
+#      that: services.ansible_facts.services['squid'].status == "enabled"
+#      fail_msg: "The squid service is not enabled (set to start at boot)"
+#      success_msg: "The squid service will start automatically"
 
   - name: test blocked connectivity
     uri:
