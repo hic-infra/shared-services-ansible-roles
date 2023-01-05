@@ -1,26 +1,26 @@
 ---
 - name: restart httpd
   become: true
-  systemd:
+  service:
     name: apache2
     state: restarted
     enabled: true
 
 - name: reload systemd-daemon
   become: true
-  systemd:
+  systemctl:
     daemon_reload: true
 
 - name: restart docker
   become: true
-  systemd:
+  service:
     name: docker
     state: restarted
     enabled: true
 
 - name: restart mongodb
   become: true
-  systemd:
+  service:
     name: mongodb
     state: restarted
     enabled: true
