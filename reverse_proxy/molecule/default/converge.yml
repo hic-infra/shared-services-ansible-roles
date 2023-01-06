@@ -13,6 +13,13 @@
         line: 127.0.0.1 cran.{{zone}}
         unsafe_writes: true # issue with testing inside a container
 
+    - name: add testing endpoint to /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1 conda.{{zone}}
+        unsafe_writes: true # issue with testing inside a container
+
     - name: install R for testing package installation
       become: true
       apt:

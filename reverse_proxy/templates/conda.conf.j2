@@ -1,0 +1,86 @@
+server {
+  listen 80;
+  server_name conda.{{zone}};
+
+  # Internal only endpoint for performing a proxy pass to the cran mirror.
+  location /conda-fetch {
+    internal;
+    proxy_pass https://repo.anaconda.org/;
+
+
+  }
+
+
+  # Define an EICAR endpoint for verifying that the reverse proxy is
+  # scanning correctly.
+  location /conda-fetch/conda-forge/eicar/download/noarch/eicar.conda {
+    internal;
+    rewrite_by_lua_block {
+      ngx.say("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
+    }
+  }
+
+  location ~ ({{conda_pkg_regex}}|{{conda_repo_regex}}) {
+    # ensure we are only processing GET requests
+    rewrite_by_lua_block {
+      function reject ()
+        ngx.exit(ngx.HTTP_FORBIDDEN)
+      end
+
+      function tlen (t)
+        local c = 0
+	for _ in pairs(t) do c = c + 1 end
+	return c
+      end
+
+      -- Verify that the request method is GET, since PUT and POST are more likely
+      -- to lead to egress (in the worst case...)
+      local method = ngx.var.request_method
+      if method ~= "GET" then
+        reject()
+      end
+
+      -- Ensure no GET parameters have been included
+      local args, _ = ngx.req.get_uri_args()
+      if tlen(args) > 0 then reject() end
+
+      -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
+      -- "/cran-fetch" is passed to the configured cran mirror.
+      ngx.log(ngx.STDERR, ngx.var.uri)
+      local res = ngx.location.capture("/conda-fetch" .. ngx.var.uri);
+
+      local path = os.tmpname()
+
+      local file = io.open(path, "w")
+      file:write(res.body)
+      file:close()
+
+      -- Launch the antivirus scanner on the temporary file.
+      local t_start = os.clock()
+      local ret = os.execute("/opt/sophos-spl/plugins/av/bin/avscanner " .. path)
+      local t_end = os.clock()
+
+      os.remove(path)
+
+      -- Add some headers for debugging and verifying things are working. :)
+      ngx.header["X-Sophos-Return-Code"] = tostring(ret)
+      ngx.header["X-Sophos-Temporary-File"] = path
+      ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
+
+      if ret == 0 then
+        ngx.say(res.body)
+      else
+        ngx.status = ngx.HTTP_BAD_GATEWAY
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.say("Malicious content was detected in the requested file.")
+	ngx.exit(ngx.HTTP_OK)
+      end
+    }
+  }
+
+  location / {
+    # Default to HTTP Forbidden
+    return 403;
+  }
+}
+

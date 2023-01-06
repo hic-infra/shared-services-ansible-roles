@@ -5,3 +5,7 @@ zone: tre.example.org
 # cran mirror
 cran_mirror: https://cran.ma.imperial.ac.uk/
 cran_regex: ^/(bin/windows|src)/contrib/(4\.1|4\.3|3\.6)*/*[a-zA-Z0-9_\-\.]*(\.tar\.gz|\.zip|PACKAGES)$
+
+# conda-forge
+conda_repo_regex: ^/conda-forge/(linux-64|win-64|noarch)/current_repodata.json$
+conda_pkg_regex: ^/pkgs/main/(linux-64|win-64|noarch)/[a-zA-Z0-9\-\._]*(\.tar\.bz2|\.conda)$

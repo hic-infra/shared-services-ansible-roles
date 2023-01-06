@@ -1,0 +1,8 @@
+---
+
+- name: add our conda-forge reverse proxy config
+  become: true
+  template:
+    dest: /etc/nginx/sites-enabled/conda.conf
+    src: conda.conf.j2
+  notify: restart nginx
