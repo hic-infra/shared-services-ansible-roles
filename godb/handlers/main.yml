@@ -1,7 +1,7 @@
 ---
 - name: restart httpd
   become: true
-  systemd:
+  service:
     name: apache2
     state: restarted
     enabled: true
@@ -10,17 +10,18 @@
   become: true
   systemd:
     daemon_reload: true
+  when: ansible_facts.service_mgr == 'systemd'
 
 - name: restart docker
   become: true
-  systemd:
+  service:
     name: docker
     state: restarted
     enabled: true
 
 - name: restart mongodb
   become: true
-  systemd:
+  service:
     name: mongodb
     state: restarted
     enabled: true
