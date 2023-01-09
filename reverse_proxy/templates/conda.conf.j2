@@ -71,7 +71,7 @@ server {
       ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
 
       if ret == 0 then
-        ngx.say(res.body)
+        ngx.print(res.body)
       else
         ngx.status = ngx.HTTP_BAD_GATEWAY
         ngx.header["Content-Type"] = "text/plain"
