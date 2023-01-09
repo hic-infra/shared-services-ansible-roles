@@ -46,6 +46,12 @@ server {
       ngx.log(ngx.STDERR, ngx.var.uri)
       local res = ngx.location.capture("/conda-fetch" .. ngx.var.uri);
 
+      -- Get the headers to ensure we return the correct Content-Type
+      local ctype = res.header['Content-Type']
+      local cenc  = res.header['Content-Encoding']
+      ngx.header["Content-Type"] = ctype
+      ngx.header["Content-Encoding"] = cenc
+
       local path = os.tmpname()
 
       local file = io.open(path, "w")
