@@ -5,11 +5,8 @@ server {
   # Internal only endpoint for performing a proxy pass to the cran mirror.
   location /conda-fetch {
     internal;
-    proxy_pass https://repo.anaconda.org/;
-
-
+    proxy_pass https://conda.anaconda.org/;
   }
-
 
   # Define an EICAR endpoint for verifying that the reverse proxy is
   # scanning correctly.
