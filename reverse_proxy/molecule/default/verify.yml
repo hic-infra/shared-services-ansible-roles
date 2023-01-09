@@ -150,3 +150,50 @@
       that: r_curl_query.status == 403
       fail_msg: "GET queries should fail"
       success_msg: "GET query was sucessfully blocked"
+
+######################################################################
+# conda-forge tests
+
+  - name: test connection to /
+    uri:
+      url: http://conda.{{zone}}/
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: conda_curl_root
+
+  - name: test connection to /
+    assert:
+      that: conda_curl_root.status == 403
+      fail_msg: "Conda mirror requests without file extensions should fail"
+      success_msg: "Conda request without file extension was successfully blocked"
+
+  - name: test connection to /conda-forge/noarch/current_repodata.json
+    uri:
+      url: http://conda.{{zone}}/conda-forge/noarch/current_repodata.json
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: conda_curl_repodata
+
+  - name: test connection to /conda-forge/noarch/current_repodata.json
+    assert:
+      that: conda_curl_repodata.status == 200
+      fail_msg: "Request to valid repodata was blocked."
+      success_msg: "Request to valid repodata was not allowed."
+
+  - name: perform installation of a package (numpy)
+    shell: |
+      eval "$(/root/miniconda3/bin/conda shell.bash hook)"
+      conda uninstall -y numpy || true
+      conda install -y numpy
+      python -c 'import numpy'
+    failed_when: false
+    changed_when: false
+    register: conda_install
+
+  - name: ensure numpy installation was successful
+    assert:
+      that: conda_install.rc == 0
+      fail_msg: "Failed to install conda package (numpy) from local proxy"
+      success_msg: "Conda package (numpy) was successfully installed via local proxy"
