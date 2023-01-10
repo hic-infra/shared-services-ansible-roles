@@ -1,23 +1,23 @@
 server {
   listen 80;
-  server_name cran.{{zone}};
+  server_name {{ generic_name }}.{{zone}};
 
   # Internal only endpoint for performing a proxy pass to the cran mirror.
-  location /cran-fetch {
+  location /{{ generic_name }}-fetch {
     internal;
-    proxy_pass {{cran_mirror}};
+    proxy_pass {{ upstream_endpoint }};
   }
 
   # Define an EICAR endpoint for verifying that the reverse proxy is
   # scanning correctly.
-  location /cran-fetch/src/contrib/eicar.tar.gz {
+  location /{{ generic_name }}-fetch/{{ eicar_path }} {
     internal;
     rewrite_by_lua_block {
       ngx.say("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
     }
   }
 
-  location ~ {{cran_regex}} {
+  location ~ {{ endpoint_regex }} {
     # ensure we are only processing GET requests
     rewrite_by_lua_block {
       function reject ()
@@ -43,7 +43,14 @@ server {
 
       -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
       -- "/cran-fetch" is passed to the configured cran mirror.
-      local res = ngx.location.capture("/cran-fetch" .. ngx.var.uri);
+      ngx.log(ngx.STDERR, ngx.var.uri)
+      local res = ngx.location.capture("/{{ generic_name }}-fetch" .. ngx.var.uri);
+
+      -- Get the headers to ensure we return the correct Content-Type
+      local ctype = res.header['Content-Type']
+      local cenc  = res.header['Content-Encoding']
+      ngx.header["Content-Type"] = ctype
+      ngx.header["Content-Encoding"] = cenc
 
       local path = os.tmpname()
 
@@ -53,7 +60,7 @@ server {
 
       -- Launch the antivirus scanner on the temporary file.
       local t_start = os.clock()
-      local ret = os.execute("/opt/sophos-spl/plugins/av/bin/avscanner " .. path)
+      local ret = os.execute("{{ av_scanner }} " .. path)
       local t_end = os.clock()
 
       os.remove(path)
@@ -64,7 +71,7 @@ server {
       ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
 
       if ret == 0 then
-        ngx.say(res.body)
+        ngx.print(res.body)
       else
         ngx.status = ngx.HTTP_BAD_GATEWAY
         ngx.header["Content-Type"] = "text/plain"
