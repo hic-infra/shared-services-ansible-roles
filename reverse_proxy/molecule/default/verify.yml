@@ -185,8 +185,9 @@
   - name: perform installation of a package (numpy)
     shell: |
       eval "$(/root/miniconda3/bin/conda shell.bash hook)"
-      conda uninstall -y numpy || true
-      conda install -y numpy
+      env=$(cat /proc/sys/kernel/random/uuid)
+      conda create -n "$env" numpy
+      conda activate "$env"
       python -c 'import numpy'
     failed_when: false
     changed_when: false
