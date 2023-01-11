@@ -4,5 +4,10 @@
   become: true
   template:
     dest: /etc/nginx/sites-enabled/cran.conf
-    src: cran.conf.j2
+    src: generic.conf.j2
+  vars:
+    generic_name: cran
+    upstream_endpoint: "{{ cran_mirror }}"
+    eicar_path: src/contrib/eicar.tar.gz
+    endpoint_regex: "{{ cran_regex }}"
   notify: restart nginx

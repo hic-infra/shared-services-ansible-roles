@@ -13,6 +13,13 @@
         line: 127.0.0.1 cran.{{zone}}
         unsafe_writes: true # issue with testing inside a container
 
+    - name: add testing endpoint to /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1 conda.{{zone}}
+        unsafe_writes: true # issue with testing inside a container
+
     - name: install R for testing package installation
       become: true
       apt:
@@ -55,3 +62,22 @@
           /usr/bin/clamscan -d /tmp/clamav.hdb $1
         dest: /opt/sophos-spl/plugins/av/bin/avscanner
         mode: u+rwx,g+rx,o+rx
+
+    - name: download conda for testing
+      get_url:
+        # ansible_arch is likely either x86_64 or aarch64 which is the same naming format as miniconda uses.
+        url: https://repo.anaconda.com/miniconda/Miniconda3-py310_22.11.1-1-Linux-{{ ansible_architecture }}.sh
+        dest: /Miniconda3.sh
+      register: conda_download
+
+    - name: install conda
+      shell: bash /Miniconda3.sh -b
+      when: conda_download.changed
+
+    - name: setup conda to use local proxy
+      copy:
+        dest: /root/.condarc
+        content: |
+          channels:
+            - http://conda.{{ zone}}/conda-forge
+          ssl_verify: False

@@ -13,3 +13,4 @@
     state: absent
 
 - include_tasks: cran.yml
+- include_tasks: conda.yml

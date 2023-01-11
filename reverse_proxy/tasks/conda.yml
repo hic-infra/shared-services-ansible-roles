@@ -1,0 +1,13 @@
+---
+
+- name: add our conda-forge reverse proxy config
+  become: true
+  template:
+    dest: /etc/nginx/sites-enabled/conda.conf
+    src: generic.conf.j2
+  vars:
+    generic_name: conda
+    upstream_endpoint: https://conda.anaconda.org/
+    eicar_path: conda-forge/eicar/download/noarch/eicar.conda
+    endpoint_regex: "({{ conda_pkg_regex }}|{{ conda_repo_regex }})"
+  notify: restart nginx
