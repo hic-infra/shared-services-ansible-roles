@@ -41,10 +41,16 @@ server {
       local args, _ = ngx.req.get_uri_args()
       if tlen(args) > 0 then reject() end
 
-      -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
-      -- "/cran-fetch" is passed to the configured cran mirror.
+      -- Perform a fetch using the internal {{ generic_name }} endpoint. Everything after the
+      -- "/{{ generic_name }}" is passed to the configured cran mirror.
       ngx.log(ngx.STDERR, ngx.var.uri)
       local res = ngx.location.capture("/{{ generic_name }}-fetch" .. ngx.var.uri);
+      if res.status ~= ngx.HTTP_OK then
+        ngx.status = res.status
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.say("An error occurred while fetching the requested file.")
+        ngx.exit(ngx.HTTP_OK)
+      end
 
       -- Get the headers to ensure we return the correct Content-Type
       local ctype = res.header['Content-Type']
