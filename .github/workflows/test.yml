@@ -9,10 +9,6 @@ name: Test roles
     paths-ignore:
       - '**/*.md'
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
 
   lint:
