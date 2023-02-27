@@ -66,9 +66,9 @@ server {
       os.remove(path)
 
       -- Add some headers for debugging and verifying things are working. :)
-      ngx.header["X-Sophos-Return-Code"] = tostring(ret)
-      ngx.header["X-Sophos-Temporary-File"] = path
-      ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
+      ngx.header["X-{{ av_scanner_header_name }}-Return-Code"] = tostring(ret)
+      ngx.header["X-{{ av_scanner_header_name }}-Temporary-File"] = path
+      ngx.header["X-{{ av_scanner_header_name }}-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
 
       if ret == 0 then
         ngx.print(res.body)

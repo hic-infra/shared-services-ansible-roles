@@ -4,7 +4,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instance
+  - name: reverse_proxy
     image: ubuntu:20.04
     privileged: true
     pre_build_image: false
@@ -15,5 +15,8 @@ provisioner:
       all:
         test: true
         zone: localhost
+  env:
+    # So that we can use hic.clamav
+    ANSIBLE_ROLES_PATH: ../../
 verifier:
   name: ansible
