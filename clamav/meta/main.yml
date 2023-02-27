@@ -1,0 +1,17 @@
+---
+
+galaxy_info:
+  author: Simon Li
+  namespace: hic
+  description: |
+    Install ClamAV from distribution package repository
+  company: Health Informatics Centre, University of Dundee
+
+  license: MIT
+
+  min_ansible_version: "7.0"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal

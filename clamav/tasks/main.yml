@@ -1,0 +1,24 @@
+---
+
+# ClamAV checks for virus definition files on startup
+# Disable this check if we are testing, or managing updates in a different way
+
+- name: Install clamav
+  become: true
+  apt:
+    name:
+      - clamav-daemon
+
+- name: Enable/disable updates
+  become: true
+  service:
+    name: clamav-freshclam
+    enabled: "{{ clamav_updates }}"
+    state: "{{ clamav_updates | ternary('started', 'stopped') }}"
+
+- name: Enable clamav
+  become: true
+  service:
+    name: clamav-daemon
+    enabled: true
+    state: started
