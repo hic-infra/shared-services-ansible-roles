@@ -9,10 +9,6 @@ name: Test roles
     paths-ignore:
       - '**/*.md'
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
 
   lint:
@@ -44,6 +40,7 @@ jobs:
     name: Run Molecule
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         role:
           - clamav
