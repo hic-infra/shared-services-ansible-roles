@@ -46,6 +46,7 @@ jobs:
     strategy:
       matrix:
         role:
+          - clamav
           - squid
           - godb
           - reverse_proxy

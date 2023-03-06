@@ -13,7 +13,7 @@ server {
   location /{{ generic_name }}-fetch/{{ eicar_path }} {
     internal;
     rewrite_by_lua_block {
-      ngx.say("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
+      ngx.print("X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
     }
   }
 
@@ -41,10 +41,16 @@ server {
       local args, _ = ngx.req.get_uri_args()
       if tlen(args) > 0 then reject() end
 
-      -- Perform a fetch using the internal cran-fetch endpoint. Everything after the
-      -- "/cran-fetch" is passed to the configured cran mirror.
+      -- Perform a fetch using the internal {{ generic_name }} endpoint. Everything after the
+      -- "/{{ generic_name }}" is passed to the configured cran mirror.
       ngx.log(ngx.STDERR, ngx.var.uri)
       local res = ngx.location.capture("/{{ generic_name }}-fetch" .. ngx.var.uri);
+      if res.status ~= ngx.HTTP_OK then
+        ngx.status = res.status
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.say("An error occurred while fetching the requested file.")
+        ngx.exit(ngx.HTTP_OK)
+      end
 
       -- Get the headers to ensure we return the correct Content-Type
       local ctype = res.header['Content-Type']
@@ -66,9 +72,9 @@ server {
       os.remove(path)
 
       -- Add some headers for debugging and verifying things are working. :)
-      ngx.header["X-Sophos-Return-Code"] = tostring(ret)
-      ngx.header["X-Sophos-Temporary-File"] = path
-      ngx.header["X-Sophos-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
+      ngx.header["X-{{ av_scanner_header_name }}-Return-Code"] = tostring(ret)
+      ngx.header["X-{{ av_scanner_header_name }}-Temporary-File"] = path
+      ngx.header["X-{{ av_scanner_header_name }}-Scan-Timer"] = tostring(t_end - t_start) .. " cpu seconds"
 
       if ret == 0 then
         ngx.print(res.body)

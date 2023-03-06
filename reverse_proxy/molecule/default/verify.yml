@@ -92,23 +92,23 @@
     changed_when: false
     register: r_curl_headers
 
-  - name: verify X-Sophos-Return-Code header is set and zero
+  - name: verify X-Avscanner-Return-Code header is set and zero
     assert:
-      that: r_curl_headers.x_sophos_return_code == "0"
-      fail_msg: "Missing header X-Sophos-Return-Code"
-      success_msg: "Header X-Sophos-Return-Code was set"
+      that: r_curl_headers.x_avscanner_return_code == "0"
+      fail_msg: "Missing header X-Avscanner-Return-Code"
+      success_msg: "Header X-Avscanner-Return-Code was set"
 
-  - name: verify X-Sophos-Scan-Timer header is set
+  - name: verify X-Avscanner-Scan-Timer header is set
     assert:
-      that: r_curl_headers.x_sophos_scan_timer
-      fail_msg: "Missing header X-Sophos-Scan-Timer"
-      success_msg: "Header X-Sophos-Scan-Timer was set"
+      that: r_curl_headers.x_avscanner_scan_timer
+      fail_msg: "Missing header X-Avscanner-Scan-Timer"
+      success_msg: "Header X-Avscanner-Scan-Timer was set"
 
-  - name: verify X-Sophos-Temporary-File header is set
+  - name: verify X-Avscanner-Temporary-File header is set
     assert:
-      that: r_curl_headers.x_sophos_temporary_file
-      fail_msg: "Missing header X-Sophos-Temporary-File"
-      success_msg: "Header X-Sophos-Temporary-File was set"
+      that: r_curl_headers.x_avscanner_temporary_file
+      fail_msg: "Missing header X-Avscanner-Temporary-File"
+      success_msg: "Header X-Avscanner-Temporary-File was set"
 
   - name: Test EICAR
     uri:
@@ -119,11 +119,11 @@
     changed_when: false
     register: eicar_result
 
-  - name: verify X-Sophos-Return-Code header is set and not zero
+  - name: verify X-Avscanner-Return-Code header is set and not zero
     assert:
-      that: eicar_result.x_sophos_return_code != "0"
-      fail_msg: "X-Sophos-Return-Code claims the EICAR is safe!"
-      success_msg: "Header X-Sophos-Return-Code correctly indicates malicious content"
+      that: eicar_result.x_avscanner_return_code != "0"
+      fail_msg: "X-Avscanner-Return-Code claims the EICAR is safe!"
+      success_msg: "Header X-Avscanner-Return-Code correctly indicates malicious content"
 
   - name: verify the contents of EICAR is not EICAR
     assert:
@@ -180,7 +180,7 @@
     assert:
       that: conda_curl_repodata.status == 200
       fail_msg: "Request to valid repodata was blocked."
-      success_msg: "Request to valid repodata was not allowed."
+      success_msg: "Request to valid repodata was allowed."
 
   - name: perform installation of a package (numpy)
     shell: |
