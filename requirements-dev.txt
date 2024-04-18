@@ -1,4 +1,4 @@
-ansible==8.5.0
+ansible==9.4.0
 ansible-compat==4.1.8
 ansible-lint==6.10.2
 molecule==6.0.2
