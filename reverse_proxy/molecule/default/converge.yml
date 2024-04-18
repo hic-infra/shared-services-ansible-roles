@@ -2,6 +2,17 @@
 - name: Converge
   hosts: all
   tasks:
+    - name: Include hic.clamav
+      include_role:
+        name: clamav
+      vars:
+        clamav_updates: false
+
+    - name: Setup eicar test environment
+      include_role:
+        name: clamav
+        tasks_from: test-eicar
+
     - name: "Include hic.reverse_proxy"
       include_role:
         name: "hic.reverse_proxy"

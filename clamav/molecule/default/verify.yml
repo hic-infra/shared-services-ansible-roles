@@ -1,0 +1,24 @@
+---
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: get service status
+      ansible.builtin.service_facts:
+
+    - name: clamav-daemon is running
+      assert:
+        that: ansible_facts.services['clamav-daemon'].state == "running"
+        fail_msg: "clamav-daemon is not running"
+        success_msg: "clamav-daemon is running"
+
+    - name: clamdscan scan bad
+      ansible.builtin.command: clamdscan --fdpass /root/eicar.com
+      register: clamdscan_bad
+      failed_when: clamdscan_bad.rc != 1
+
+    - name: clamdscan scan good
+      ansible.builtin.command: clamdscan --fdpass /etc/issue
+      register: clamdscan_good
+      failed_when: clamdscan_good.rc != 0
