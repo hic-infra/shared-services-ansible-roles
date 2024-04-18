@@ -36,15 +36,12 @@
         install_recommends: false
       register: clamav_install
 
-    - name: Create an EICAR file
+    - name: Create an EICAR signature db for ClamAV
       copy:
+        # This is the sha256 with file length and a name
         content: |
-          X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
-        dest: /tmp/eicar.txt
-
-    - name: Create a dummy database
-      become: true
-      shell: sigtool --sha256 /tmp/eicar.txt > /tmp/clamav.hdb
+          131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267:69:eicar
+        dest: /tmp/clamav.hdb
       when: clamav_install.changed
 
     - name: create faux sophos-spl installation
