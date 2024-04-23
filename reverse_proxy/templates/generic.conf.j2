@@ -5,7 +5,13 @@ server {
   # Internal only endpoint for performing a proxy pass to the cran mirror.
   location /{{ generic_name }}-fetch {
     internal;
-    proxy_pass {{ upstream_endpoint }};
+    rewrite_by_lua_block {
+      local uri = ngx.var.uri:gsub("{{ generic_name }}%-fetch", "")
+      local curl = io.popen("/usr/bin/curl \"{{ upstream_endpoint }}" .. uri .. "\"")
+      ngx.print(curl:read('*a'))
+      curl:close();
+      ngx.exit(ngx.HTTP_OK)
+    }
   }
 
   # Define an EICAR endpoint for verifying that the reverse proxy is
