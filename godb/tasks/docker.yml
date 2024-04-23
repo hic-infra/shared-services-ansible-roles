@@ -21,13 +21,34 @@
     repo: deb https://download.docker.com/linux/ubuntu focal stable
     state: present
 
+- name: debug
+  debug:
+    var: ansible_facts.service_mgr
+
 - name: install docker
   become: true
-  notify: restart docker
+  #notify: restart docker
   apt:
     name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
+  register: apt_install
+
+- name: temporary fix for docker in docker
+  become: true
+  notify: restart docker
+  ansible.builtin.lineinfile:
+    path: /etc/init.d/docker
+    state: absent
+    regexp: 'ulimit -Hn 524288'
+  when: ansible_facts.service_mgr == 'sysvinit'
+- name: no temp fix needed
+  become: true
+  notify: restart docker
+  assert: { that: true, quiet: true } # trigger notify
+  when:
+    - ansible_facts.service_mgr != 'sysvinit'
+    - apt_install.changed
 
 - meta: flush_handlers
