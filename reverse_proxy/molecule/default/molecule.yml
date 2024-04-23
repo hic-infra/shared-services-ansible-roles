@@ -10,6 +10,7 @@ platforms:
     pre_build_image: false
 provisioner:
   name: ansible
+  log: true
   inventory:
     group_vars:
       all:
@@ -17,6 +18,6 @@ provisioner:
         zone: localhost
   env:
     # So that we can use hic.clamav
-    ANSIBLE_ROLES_PATH: ../../
+    ANSIBLE_ROLES_PATH: ../../../
 verifier:
   name: ansible
