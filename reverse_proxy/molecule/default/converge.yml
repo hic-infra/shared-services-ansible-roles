@@ -15,7 +15,7 @@
 
     - name: "Include hic.reverse_proxy"
       include_role:
-        name: "hic.reverse_proxy"
+        name: reverse_proxy
 
     - name: add testing endpoint to /etc/hosts
       become: true
@@ -38,22 +38,6 @@
           - r-base
           - build-essential
         install_recommends: false
-
-    - name: install ClamAV for a more proper test
-      become: true
-      apt:
-        name:
-          - clamav
-        install_recommends: false
-      register: clamav_install
-
-    - name: Create an EICAR signature db for ClamAV
-      copy:
-        # This is the sha256 with file length and a name
-        content: |
-          131f95c51cc819465fa1797f6ccacf9d494aaaff46fa3eac73ae63ffbdfd8267:69:eicar
-        dest: /tmp/clamav.hdb
-      when: clamav_install.changed
 
     - name: create faux sophos-spl installation
       become: true
