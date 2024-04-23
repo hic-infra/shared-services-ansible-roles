@@ -35,6 +35,13 @@
       - containerd.io
   register: apt_install
 
+
+  # Running docker inside docker causes an issue. the sysvinit script
+  # explicitly sets a hard ulimit on nofiles. Since the limit is the
+  # same as the docker service's limit, it fails. It could probably be
+  # a smaller value, but disabling it also works. A noop has been
+  # added to trigger the docker service restart handler if we're not
+  # using sysvinit.
 - name: temporary fix for docker in docker
   become: true
   notify: restart docker
