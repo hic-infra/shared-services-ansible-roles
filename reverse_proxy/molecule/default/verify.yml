@@ -215,13 +215,17 @@
       fail_msg: "Request to valid repodata was blocked."
       success_msg: "Request to valid repodata was allowed."
 
-  - name: perform installation of a package (plink2)
+
+  # I wanted to install plink2 but it's not available for aarch64, and
+  # using docker linux/amd64 causes the nginx lua VM to crash at
+  # startup. bamsnap is a noarch package.
+  - name: perform installation of a package (bamsnap)
     shell: |
       eval "$(/root/miniconda3/bin/conda shell.bash hook)"
       env=$(cat /proc/sys/kernel/random/uuid)
-      conda create -n "$env" bioconda:plink2
+      conda create -n "$env" -c bioconda bamsnap
       conda activate "$env"
-      plink2
+      python -c "import bamsnap"
     failed_when: false
     changed_when: false
     register: bioconda_install
@@ -229,5 +233,5 @@
   - name: ensure plink2 installation was successful
     assert:
       that: bioconda_install.rc == 0
-      fail_msg: "Failed to install conda package (plink2) from local proxy"
-      success_msg: "Conda package (plink2) was successfully installed via local proxy"
+      fail_msg: "Failed to install conda package (bamsnap) from local proxy"
+      success_msg: "Conda package (bamsnap) was successfully installed via local proxy"
