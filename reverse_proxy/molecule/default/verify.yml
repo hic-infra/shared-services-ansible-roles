@@ -198,3 +198,36 @@
       that: conda_install.rc == 0
       fail_msg: "Failed to install conda package (numpy) from local proxy"
       success_msg: "Conda package (numpy) was successfully installed via local proxy"
+
+# and bioconda...
+
+  - name: test connection to /bioconda/noarch/current_repodata.json
+    uri:
+      url: http://conda.{{zone}}/bioconda/noarch/current_repodata.json
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconda_curl_repodata
+
+  - name: test connection to /bioconda/noarch/current_repodata.json
+    assert:
+      that: bioconda_curl_repodata.status == 200
+      fail_msg: "Request to valid repodata was blocked."
+      success_msg: "Request to valid repodata was allowed."
+
+  - name: perform installation of a package (plink2)
+    shell: |
+      eval "$(/root/miniconda3/bin/conda shell.bash hook)"
+      env=$(cat /proc/sys/kernel/random/uuid)
+      conda create -n "$env" bioconda:plink2
+      conda activate "$env"
+      plink2
+    failed_when: false
+    changed_when: false
+    register: bioconda_install
+
+  - name: ensure plink2 installation was successful
+    assert:
+      that: bioconda_install.rc == 0
+      fail_msg: "Failed to install conda package (plink2) from local proxy"
+      success_msg: "Conda package (plink2) was successfully installed via local proxy"
