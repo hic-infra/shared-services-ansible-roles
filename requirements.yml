@@ -4,7 +4,7 @@ collections:
     version: 1.3.0
     type: galaxy
   - name: community.general
-    version: 8.6.1
+    version: 9.2.0
     type: galaxy
   - name: community.docker
-    version: 3.10.1
+    version: 3.11.0
