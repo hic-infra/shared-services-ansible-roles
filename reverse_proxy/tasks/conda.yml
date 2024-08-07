@@ -10,4 +10,6 @@
     upstream_endpoint: https://conda.anaconda.org/
     eicar_path: conda-forge/eicar/download/noarch/eicar.conda
     endpoint_regex: "({{ conda_pkg_regex }}|{{ conda_repo_regex }})"
+    certificate_file: "{{ conda_cert }}"
+    certificate_key_file: "{{ conda_cert_key }}"
   notify: restart nginx

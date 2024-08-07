@@ -10,4 +10,6 @@
     upstream_endpoint: "{{ cran_mirror }}"
     eicar_path: src/contrib/eicar.tar.gz
     endpoint_regex: "{{ cran_regex }}"
+    certificate_file: "{{ cran_cert }}"
+    certificate_key_file: "{{ cran_cert_key }}"
   notify: restart nginx
