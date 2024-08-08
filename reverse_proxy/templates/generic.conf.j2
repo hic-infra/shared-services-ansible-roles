@@ -2,6 +2,12 @@ server {
   listen 80;
   server_name {{ generic_name }}.{{zone}};
 
+  {% if certificate_file %}
+  listen 443 ssl;
+  ssl_certificate {{ certificate_file }};
+  ssl_certificate_key {{ certificate_key_file }};
+  {% endif %}
+
   # Internal only endpoint for performing a proxy pass to the cran mirror.
   location /{{ generic_name }}-fetch {
     internal;

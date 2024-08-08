@@ -17,3 +17,10 @@ av_scanner_header_name: Avscanner
 
 # For Sophos use:
 # av_scanner: /opt/sophos-spl/plugins/av/bin/avscanner
+
+
+# For certificates:
+cran_cert: ""
+cran_cert_key: ""
+conda_cert: ""
+conda_cert_key: ""
