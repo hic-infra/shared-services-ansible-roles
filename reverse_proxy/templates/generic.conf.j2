@@ -2,7 +2,7 @@ server {
   listen 80;
   server_name {{ generic_name }}.{{zone}};
 
-  {% if certificate_file is defined %}
+  {% if certificate_file %}
   listen 443 ssl;
   ssl_certificate {{ certificate_file }};
   ssl_certificate_key {{ certificate_key_file }};
