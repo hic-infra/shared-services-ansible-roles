@@ -4,4 +4,4 @@ FROM {{ item.registry.url }}/{{ item.image }}
 FROM {{ item.image }}
 {% endif %}
 
-RUN apt update && apt install -y curl python sudo
+RUN apt update && apt install -y curl python3 sudo
