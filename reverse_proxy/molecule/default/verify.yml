@@ -155,6 +155,38 @@
       fail_msg: "GET queries should fail"
       success_msg: "GET query was sucessfully blocked"
 
+
+######################################################################
+# bioconductor tests
+
+  - name: test connection to /
+    uri:
+      url: http://bioconductor.{{zone}}/
+      force: true # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_curl_root
+
+  - name: test connection to /
+    assert:
+      that: bioconductor_curl_root.status == 403
+      fail_msg: "bioconductor mirror requests without file extensions should fail"
+      success_msg: "bioconductor request without file extension was successfully blocked"
+
+  - name: test connection to packages/3.20/bioc/src/contrib/PACKAGES
+    uri:
+      url: http://bioconductor.{{zone}}/packages/3.20/bioc/src/contrib/PACKAGES
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_curl_packages
+
+  - name: test connection to /packages/3.20/bioc/src/contrib/PACKAGES
+    assert:
+      that: bioconductor_curl_packages.status == 200
+      fail_msg: "Request to valid file extension was blocked."
+      success_msg: "Request to valid file extension was not blocked."
+
 ######################################################################
 # conda-forge tests
 

@@ -1,0 +1,15 @@
+---
+
+- name: add our bioconductor reverse proxy config
+  become: true
+  template:
+    dest: /etc/nginx/sites-enabled/bioconductor.conf
+    src: generic.conf.j2
+  vars:
+    generic_name: bioconductor
+    upstream_endpoint: "{{ bioconductor_mirror }}"
+    eicar_path: packages/src/contrib/eicar.tar.gz
+    endpoint_regex: "{{ bioconductor_regex }}"
+    certificate_file: "{{ bioconductor_cert }}"
+    certificate_key_file: "{{ bioconductor_cert_key }}"
+  notify: restart nginx
