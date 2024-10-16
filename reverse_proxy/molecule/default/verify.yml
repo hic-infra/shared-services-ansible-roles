@@ -236,8 +236,8 @@
   - name: ensure bioconductor package installed successfully
     assert:
       that: bioc_install.rc == 0
-      fail_msg: "Failed to install R package (dplyr) from local proxy"
-      success_msg: "R package (dplyr) was successfully installed via local proxy"
+      fail_msg: "Failed to install BiocManager from local proxy"
+      success_msg: "BiocManager was successfully installed via local proxy"
 
 ######################################################################
 # conda-forge tests
