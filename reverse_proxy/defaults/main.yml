@@ -8,9 +8,9 @@ cran_regex: ^/(bin/windows|src)/contrib/(4\.1|4\.3|4\.4|3\.6)*/*[a-zA-Z0-9_\-\.]
 
 # bioconductor
 bioconductor_mirror: https://bioconductor.statistik.tu-dortmund.de/
-bioc_repo_regex: ^\/packages\/[0-9\.]+/(src|bin\/windows)\/contrib\/[a-zA-Z0-9_\-\.]*(\.tar\.gz|\.zip)$
-bioc_index_regex: ^\/packages\/[0-9\.]+/workflows/src/contrib/PACKAGES$
-bioc_data_regex: ^\/packages/[0-9\.]+/(workflows|data\/(annotation|experiment))\/src\/contrib\/PACKAGES$
+bioc_repo_regex: ^\/packages\/[0-9\.]+\/(bioc\/)*(src|bin\/windows)\/contrib\/[a-zA-Z0-9_\-\.]*(\.tar\.gz|\.zip)$
+bioc_index_regex: ^\/packages\/[0-9\.]+\/(bioc|workflows)\/src\/contrib\/PACKAGES$
+bioc_data_regex: ^\/packages\/[0-9\.]+\/(workflows|data\/(annotation|experiment))\/src\/contrib\/PACKAGES$
 bioconductor_regex: '({{bioc_repo_regex}}|{{bioc_index_regex}}|{{bioc_data_regex}})'
 
 # conda-forge
