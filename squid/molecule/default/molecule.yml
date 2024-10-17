@@ -14,6 +14,6 @@ provisioner:
     group_vars:
       all:
         allowed_domains:
-          - dundee.ac.uk
+          - eu.httpbin.org
 verifier:
   name: ansible

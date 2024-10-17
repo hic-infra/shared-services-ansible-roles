@@ -155,6 +155,90 @@
       fail_msg: "GET queries should fail"
       success_msg: "GET query was sucessfully blocked"
 
+
+######################################################################
+# bioconductor tests
+
+  - name: test connection to /
+    uri:
+      url: http://bioconductor.{{zone}}/
+      force: true # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_curl_root
+
+  - name: test connection to /
+    assert:
+      that: bioconductor_curl_root.status == 403
+      fail_msg: "bioconductor mirror requests without file extensions should fail"
+      success_msg: "bioconductor request without file extension was successfully blocked"
+
+  - name: test connection to packages/3.20/bioc/src/contrib/PACKAGES
+    uri:
+      url: http://bioconductor.{{zone}}/packages/3.20/bioc/src/contrib/PACKAGES
+      force: true  # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_curl_packages
+
+  - name: test connection to /packages/3.20/bioc/src/contrib/PACKAGES
+    assert:
+      that: bioconductor_curl_packages.status == 200
+      fail_msg: "Request to valid file extension was blocked."
+      success_msg: "Request to valid file extension was not blocked."
+
+  - name: test connection data/annotation/src/contrib/chicken.db_3.13.0.tar.gz
+    uri:
+      url: http://bioconductor.{{zone}}/packages/3.20/data/annotation/src/contrib/chicken.db_3.13.0.tar.gz
+      force: true # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_data1
+
+  - name: test connection data/annotation/src/contrib/chicken.db_3.13.0.tar.gz
+    assert:
+      that: bioconductor_data1.status == 403
+      fail_msg: "bioconductor requests to annotation data should fail"
+      success_msg: "bioconductor requests to annotation data failed correctly"
+
+  - name: test connection data/experiment/src/contrib/colonCA_1.46.0.tar.gz
+    uri:
+      url: http://bioconductor.{{zone}}/packages/release/data/experiment/src/contrib/colonCA_1.46.0.tar.gz
+      force: true # avoid hitting cache
+    failed_when: false
+    changed_when: false
+    register: bioconductor_data2
+
+  - name: test connection data/experiment/src/contrib/colonCA_1.46.0.tar.gz
+    assert:
+      that: bioconductor_data2.status == 403
+      fail_msg: "bioconductor requests to experiment data should fail"
+      success_msg: "bioconductor requests to experiment data failed correctly"
+
+  - name: bioconductor package installation
+    shell:
+      cmd: |
+        rm -rf /usr/local/lib/R/site-library/BiocVersion # remove if installed
+        /usr/bin/R --no-save <<RPROG
+        install.packages("BiocManager")
+        options(BIOCONDUCTOR_CONFIG_FILE="file:///root/config.yaml")
+        options(BioC_mirror="http://bioconductor.localhost")
+        options(BIOCMANAGER_SITE_REPOSITORY="http://bioconductor.localhost")
+        library(BiocManager)
+        BiocManager::install("BiocVersion")
+        q()
+        RPROG
+        ls /usr/local/lib/R/site-library/BiocVersion
+    failed_when: false
+    changed_when: false
+    register: bioc_install
+
+  - name: ensure bioconductor package installed successfully
+    assert:
+      that: bioc_install.rc == 0
+      fail_msg: "Failed to install BiocManager from local proxy"
+      success_msg: "BiocManager was successfully installed via local proxy"
+
 ######################################################################
 # conda-forge tests
 
