@@ -9,13 +9,13 @@
 
   - name: nginx is installed
     assert:
-      that: services.ansible_facts.services.nginx is defined
+      that: services.ansible_facts.services.openresty is defined
       fail_msg: "No nginx service was defined"
       success_msg: "Nginx service found!"
 
   - name: nginx is running
     assert:
-      that: services.ansible_facts.services['nginx'].state == "running"
+      that: services.ansible_facts.services['openresty'].state == "running"
       fail_msg: "The nginx service does not appear to be running"
       success_msg: "Nginx service is running"
 
