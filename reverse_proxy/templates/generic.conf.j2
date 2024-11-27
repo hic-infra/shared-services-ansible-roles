@@ -78,7 +78,8 @@ server {
 
       -- Launch the antivirus scanner on the temporary file.
       local t_start = os.clock()
-      local ret = os.execute("{{ av_scanner }} " .. path)
+      local ret = 1
+      _, _, ret = os.execute("{{ av_scanner }} " .. path)
       local t_end = os.clock()
 
       os.remove(path)

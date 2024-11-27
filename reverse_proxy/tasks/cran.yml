@@ -3,7 +3,7 @@
 - name: add our cran reverse proxy config
   become: true
   template:
-    dest: /etc/nginx/sites-enabled/cran.conf
+    dest: /etc/openresty/sites-enabled/cran.conf
     src: generic.conf.j2
   vars:
     generic_name: cran

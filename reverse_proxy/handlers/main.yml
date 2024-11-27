@@ -2,7 +2,7 @@
 - name: restart nginx
   become: true
   service:
-    name: nginx
+    name: openresty
     state: restarted
     enabled: true
 

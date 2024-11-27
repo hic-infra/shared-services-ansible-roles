@@ -1,16 +1,48 @@
 ---
+- name: install gnupg
+  become: true
+  apt:
+    update_cache: true
+    name:
+      - gnupg
+
+- name: install openresty repository key
+  become: true
+  apt_key:
+    url: https://openresty.org/package/pubkey.gpg
+    id: E52218E7087897DC6DEA6D6D97DB7443D5EDEB74
+
+- name: add openresty repository
+  when: ansible_architecture == "x86_64"
+  ansible.builtin.apt_repository:
+    repo: deb http://openresty.org/package/ubuntu noble main
+    state: present
+
+- name: add openresty repository
+  when: ansible_architecture == "aarch64"
+  ansible.builtin.apt_repository:
+    repo: deb http://openresty.org/package/arm64/ubuntu noble main
+    state: present
+
 - name: install nginx
   become: true
   apt:
+    update_cache: true
+    install_recommends: false
     name:
-      - nginx-extras # for proxying
       - git # for testing
+      - openresty
 
-- name: remove default site configuration
-  become: true
-  file:
-    path: /etc/nginx/sites-enabled/default
-    state: absent
+- name: ensure openresty includes enabled sites
+  ansible.builtin.lineinfile:
+    path: /etc/openresty/nginx.conf
+    insertafter: "default_type"
+    line: "include /etc/openresty/sites-enabled/*.conf;"
+
+- name: create sites-enabled directory
+  ansible.builtin.file:
+    path: /etc/openresty/sites-enabled
+    state: directory
 
 - include_tasks: cran.yml
 - include_tasks: bioconductor.yml

@@ -9,13 +9,13 @@
 
   - name: nginx is installed
     assert:
-      that: services.ansible_facts.services.nginx is defined
+      that: services.ansible_facts.services.openresty is defined
       fail_msg: "No nginx service was defined"
       success_msg: "Nginx service found!"
 
   - name: nginx is running
     assert:
-      that: services.ansible_facts.services['nginx'].state == "running"
+      that: services.ansible_facts.services['openresty'].state == "running"
       fail_msg: "The nginx service does not appear to be running"
       success_msg: "Nginx service is running"
 
@@ -64,29 +64,25 @@
       fail_msg: "Request to valid file extension was blocked."
       success_msg: "Request to valid file extension was not blocked."
 
-  # Ubuntu 20.04 uses R 3, and packages for R 3 are no longer
-  # available in CRAN. We can sort this out when we move to Ubuntu
-  # 22.04 or later:
+  - name: r package installation
+    shell:
+      cmd: |
+        rm -rf /usr/local/lib/R/site-library/dplyr # remove if installed
+        /usr/bin/R --no-save <<RPROG
+        install.packages("dplyr", repos="http://cran.{{zone}}")
+        library('dplyr')
+        q()
+        RPROG
+        ls /usr/local/lib/R/site-library/dplyr
+    failed_when: false
+    changed_when: false
+    register: r_install
 
-  # - name: r package installation
-  #   shell:
-  #     cmd: |
-  #       rm -rf /usr/local/lib/R/site-library/dplyr # remove if installed
-  #       /usr/bin/R --no-save <<RPROG
-  #       install.packages("dplyr", repos="http://cran.{{zone}}")
-  #       library('dplyr')
-  #       q()
-  #       RPROG
-  #       ls /usr/local/lib/R/site-library/dplyr
-  #   failed_when: false
-  #   changed_when: false
-  #   register: r_install
-
-  # - name: ensure r package installed successfully
-  #   assert:
-  #     that: r_install.rc == 0
-  #     fail_msg: "Failed to install R package (dplyr) from local proxy"
-  #     success_msg: "R package (dplyr) was successfully installed via local proxy"
+  - name: ensure r package installed successfully
+    assert:
+      that: r_install.rc == 0
+      fail_msg: "Failed to install R package (dplyr) from local proxy"
+      success_msg: "R package (dplyr) was successfully installed via local proxy"
 
   - name: check avscanner headers
     uri:
