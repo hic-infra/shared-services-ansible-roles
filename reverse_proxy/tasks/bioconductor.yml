@@ -3,7 +3,7 @@
 - name: add our bioconductor reverse proxy config
   become: true
   template:
-    dest: /etc/nginx/sites-enabled/bioconductor.conf
+    dest: /etc/openresty/sites-enabled/bioconductor.conf
     src: generic.conf.j2
   vars:
     generic_name: bioconductor
