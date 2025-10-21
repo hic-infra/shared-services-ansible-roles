@@ -12,6 +12,13 @@
     path: /etc/nginx/sites-enabled/default
     state: absent
 
+- name: hide server tokens
+  become: true
+  lineinfile:
+    insertafter: "http {"
+    line: "server_tokens off;"
+    path: /etc/nginx/nginx.conf
+
 - include_tasks: cran.yml
 - include_tasks: bioconductor.yml
 - include_tasks: conda.yml
