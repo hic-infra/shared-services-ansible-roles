@@ -3,7 +3,7 @@
 - name: add our conda-forge reverse proxy config
   become: true
   template:
-    dest: /etc/nginx/sites-enabled/conda.conf
+    dest: /etc/openresty/sites-enabled/conda.conf
     src: generic.conf.j2
   vars:
     generic_name: conda
